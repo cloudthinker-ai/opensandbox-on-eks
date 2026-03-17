@@ -1,6 +1,4 @@
 <div align="center">
-  <img src="docs/assets/logo.svg" alt="OpenSandbox logo" width="150" />
-
   <h1>OpenSandbox</h1>
 
   <p>Sandbox platform for AI coding agents — isolated, persistent development environments with pre-installed tools on Kubernetes.</p>
