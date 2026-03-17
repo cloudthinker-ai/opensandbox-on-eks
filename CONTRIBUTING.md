@@ -24,7 +24,7 @@ OpenSandbox adheres to a [Code of Conduct](../CODE_OF_CONDUCT.md) that we expect
 
 There are many ways to contribute to OpenSandbox:
 
-- **Report Bugs**: Submit detailed bug reports through [GitHub Issues](https://github.com/alibaba/OpenSandbox/issues)
+- **Report Bugs**: Submit detailed bug reports through [GitHub Issues](https://github.com/cloudthinker-ai/opensandbox-on-eks/issues)
 - **Suggest Features**: Propose new features or improvements
 - **Write Code**: Fix bugs, implement features, or improve performance
 - **Improve Documentation**: Enhance README files, write tutorials, or fix typos
@@ -36,8 +36,8 @@ There are many ways to contribute to OpenSandbox:
 
 1. **Search Existing Issues**: Check if your bug report or feature request already exists
 2. **Check Roadmap**: Review the project roadmap to see if your idea aligns with project goals
-3. **Discuss Major Changes**: For significant changes, open an issue first or submit an [OSEP](oseps/README.md) to discuss your approach
-4. **Review Architecture**: Read [docs/architecture.md](architecture.md) to understand the system design
+3. **Discuss Major Changes**: For significant changes, open an issue first to discuss your approach
+4. **Review Architecture**: Read [docs/architecture.md](docs/architecture/architecture.md) to understand the system design
 
 ## Development Environment Setup
 
@@ -145,7 +145,7 @@ OpenSandbox/
 
 For major features, architectural changes, or modifications to the core API/security model, we follow the **OSEP (OpenSandbox Enhancement Proposals)** process.
 
-Please read the [OSEP README](oseps/README.md) to understand when an OSEP is required and how to submit one. Small bug fixes and minor improvements do not require an OSEP.
+Small bug fixes and minor improvements do not require an OSEP.
 
 ### Branching Strategy
 
@@ -516,7 +516,7 @@ Use GitHub Discussions for:
 
 ### Documentation
 
-- [Architecture Overview](architecture.md)
+- [Architecture Overview](docs/architecture/architecture.md)
 - [Server Development Guide](../server/DEVELOPMENT.md)
 - [execd Development Guide](../components/execd/DEVELOPMENT.md)
 - [OpenAPI Specifications](../specs/README.md)

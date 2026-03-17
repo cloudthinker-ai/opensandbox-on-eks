@@ -4,6 +4,9 @@
 # nameOverride: ""
 # fullnameOverride: ""
 
+# -- Namespace creation (set false if you pre-create namespaces with secrets)
+createNamespaces: true
+
 # -- CRD installation
 crds:
   install: true
@@ -16,17 +19,17 @@ images:
   server:
     repository: opensandbox/server
     tag: dev
-    pullPolicy: Never
+    pullPolicy: IfNotPresent
   controller:
     repository: opensandbox/controller
     tag: dev
-    pullPolicy: Never
+    pullPolicy: IfNotPresent
   execd:
     repository: opensandbox/execd
     tag: dev
   egress:
     repository: opensandbox/egress-sidecar
-    tag: dev
+    tag: v1.0.1
 
 # -- Controller configuration
 controller:
@@ -81,7 +84,7 @@ server:
       snapshot_class: ""
       snapshot_max_retention: 1
       archive_after_seconds: 3600
-      storage_class: ""
+      storage_class: ""  # REQUIRED for production: set to your cluster's StorageClass (e.g. "gp3", "standard")
       storage_size: "20Gi"
     ingress:
       mode: "direct"

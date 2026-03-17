@@ -179,7 +179,7 @@ For common issues and solutions, see [Troubleshooting](TROUBLESHOOTING.md).
    ```toml
    [runtime]
    type = "kubernetes"
-   execd_image = "opensandbox/execd:v1.0.5"
+   execd_image = "opensandbox/execd:v1.0.6"
 
    [kubernetes]
    kubeconfig_path = "~/.kube/config"
