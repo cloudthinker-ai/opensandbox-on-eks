@@ -3,6 +3,8 @@
 
   <p>Sandbox platform for AI coding agents — isolated, persistent development environments with pre-installed tools on Kubernetes.</p>
 
+  <p><em>This is a fork of <a href="https://github.com/alibaba/OpenSandbox">alibaba/OpenSandbox</a>.</em></p>
+
   <hr />
 </div>
 
