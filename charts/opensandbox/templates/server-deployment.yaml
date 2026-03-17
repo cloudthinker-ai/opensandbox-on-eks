@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "opensandbox.fullname" . }}-server
+  namespace: {{ include "opensandbox.serverNamespace" . }}
+  labels:
+    {{- include "opensandbox.serverLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.server.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "opensandbox.serverSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include "opensandbox.configToml" . | sha256sum }}
+        checksum/template: {{ .Values.server.batchsandboxTemplate | sha256sum }}
+        {{- if and .Values.server.config.egress.enabled .Values.networkAccessConfig.enabled }}
+        checksum/network-access: {{ toYaml .Values.networkAccessConfig | sha256sum }}
+        {{- end }}
+      labels:
+        {{- include "opensandbox.serverSelectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "opensandbox.fullname" . }}-server
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: server
+        image: {{ include "opensandbox.serverImage" . }}
+        imagePullPolicy: {{ .Values.images.server.pullPolicy }}
+        args: ["--config", "/etc/opensandbox/config.toml"]
+        ports:
+        - containerPort: {{ .Values.server.config.server.port }}
+          name: http
+        env:
+        - name: SANDBOX_CONFIG_PATH
+          value: /etc/opensandbox/config.toml
+        volumeMounts:
+        - name: config
+          mountPath: /etc/opensandbox/config.toml
+          subPath: config.toml
+        - name: batchsandbox-template
+          mountPath: /etc/opensandbox/batchsandbox-template.yaml
+          subPath: batchsandbox-template.yaml
+        {{- if and .Values.server.config.egress.enabled .Values.networkAccessConfig.enabled }}
+        - name: network-access-config
+          mountPath: /etc/opensandbox/network-access-config.yaml
+          subPath: config.yaml
+        {{- end }}
+        resources:
+          {{- toYaml .Values.server.resources | nindent 10 }}
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sh", "-c", "sleep 5"]
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.server.config.server.port }}
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          failureThreshold: 2
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.server.config.server.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 30
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "opensandbox.fullname" . }}-server-config
+      - name: batchsandbox-template
+        configMap:
+          name: {{ include "opensandbox.fullname" . }}-batchsandbox-template
+      {{- if and .Values.server.config.egress.enabled .Values.networkAccessConfig.enabled }}
+      - name: network-access-config
+        configMap:
+          name: {{ include "opensandbox.fullname" . }}-network-access-config
+      {{- end }}

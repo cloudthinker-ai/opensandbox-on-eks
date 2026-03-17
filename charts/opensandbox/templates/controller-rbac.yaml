@@ -1,0 +1,131 @@
+---
+# Controller ClusterRole — manages BatchSandboxes, Pools, Pods
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "opensandbox.fullname" . }}-manager-role
+  labels:
+    {{- include "opensandbox.controllerLabels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  - pods
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - sandbox.opensandbox.io
+  resources:
+  - batchsandboxes
+  - pools
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - sandbox.opensandbox.io
+  resources:
+  - batchsandboxes/finalizers
+  - pools/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - sandbox.opensandbox.io
+  resources:
+  - batchsandboxes/status
+  - pools/status
+  verbs:
+  - get
+  - patch
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "opensandbox.fullname" . }}-manager-rolebinding
+  labels:
+    {{- include "opensandbox.controllerLabels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "opensandbox.fullname" . }}-manager-role
+subjects:
+- kind: ServiceAccount
+  name: {{ include "opensandbox.fullname" . }}-controller-manager
+  namespace: {{ include "opensandbox.controllerNamespace" . }}
+---
+# Leader election Role (namespaced to controller namespace)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "opensandbox.fullname" . }}-leader-election-role
+  namespace: {{ include "opensandbox.controllerNamespace" . }}
+  labels:
+    {{- include "opensandbox.controllerLabels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "opensandbox.fullname" . }}-leader-election-rolebinding
+  namespace: {{ include "opensandbox.controllerNamespace" . }}
+  labels:
+    {{- include "opensandbox.controllerLabels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "opensandbox.fullname" . }}-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: {{ include "opensandbox.fullname" . }}-controller-manager
+  namespace: {{ include "opensandbox.controllerNamespace" . }}

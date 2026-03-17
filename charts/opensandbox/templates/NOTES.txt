@@ -1,0 +1,22 @@
+OpenSandbox has been deployed!
+
+Server namespace:     {{ include "opensandbox.serverNamespace" . }}
+Controller namespace: {{ include "opensandbox.controllerNamespace" . }}
+
+To check pod status:
+  kubectl get pods -n {{ include "opensandbox.serverNamespace" . }}
+  kubectl get pods -n {{ include "opensandbox.controllerNamespace" . }}
+
+To access the server:
+{{- if eq .Values.server.service.type "NodePort" }}
+  export NODE_PORT=$(kubectl get --namespace {{ include "opensandbox.serverNamespace" . }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "opensandbox.fullname" . }}-server)
+  curl http://localhost:$NODE_PORT/health
+{{- else }}
+  kubectl port-forward -n {{ include "opensandbox.serverNamespace" . }} svc/{{ include "opensandbox.fullname" . }}-server 8090:{{ .Values.server.service.port }}
+  curl http://localhost:8090/health
+{{- end }}
+
+To create a sandbox:
+  curl -X POST http://localhost:8090/api/v1/sandboxes \
+    -H "Content-Type: application/json" \
+    -d '{"image": "your-sandbox-image:tag", "keep_alive": 1800}'

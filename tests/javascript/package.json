@@ -1,0 +1,27 @@
+{
+  "name": "opensandbox-javascript-e2e-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "pretest": "pnpm install --prefer-offline",
+    "prep:sdk": "pnpm -C ../../sdks install --prefer-offline && pnpm -C ../../sdks run build:js",
+    "lint": "eslint . --max-warnings 0",
+    "test": "pnpm run prep:sdk && pnpm exec vitest run",
+    "pretest:ci": "pnpm install --prefer-offline",
+    "test:ci": "pnpm run prep:sdk && pnpm exec vitest run --reporter=default --reporter=junit --outputFile=build/test-results/junit.xml"
+  },
+  "dependencies": {
+    "@alibaba-group/opensandbox": "link:../../sdks/sandbox/javascript",
+    "@alibaba-group/opensandbox-code-interpreter": "link:../../sdks/code-interpreter/javascript"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^20.11.30",
+    "eslint": "^9.39.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.52.0",
+    "vitest": "^2.1.9"
+  }
+}

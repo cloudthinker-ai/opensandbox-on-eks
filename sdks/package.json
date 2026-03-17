@@ -1,0 +1,18 @@
+{
+  "name": "opensandbox-sdks",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "build:js": "pnpm -r --filter @alibaba-group/opensandbox-code-interpreter... --sort run build",
+    "lint:js": "pnpm -r --filter @alibaba-group/opensandbox-code-interpreter... run lint",
+    "clean:js": "pnpm -r --filter @alibaba-group/opensandbox-code-interpreter... --sort run clean",
+    "publish:js": "pnpm -r --filter @alibaba-group/opensandbox-code-interpreter... publish --access public --no-git-checks"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "globals": "^17.0.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.52.0"
+  }
+}

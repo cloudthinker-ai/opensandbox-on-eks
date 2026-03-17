@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "opensandbox.fullname" . }}-controller-manager
+  namespace: {{ include "opensandbox.controllerNamespace" . }}
+  labels:
+    {{- include "opensandbox.controllerLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.controller.replicas }}
+  selector:
+    matchLabels:
+      {{- include "opensandbox.controllerSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels:
+        {{- include "opensandbox.controllerSelectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: {{ include "opensandbox.fullname" . }}-controller-manager
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: manager
+        image: {{ include "opensandbox.controllerImage" . }}
+        imagePullPolicy: {{ .Values.images.controller.pullPolicy }}
+        command:
+        - /workspace/server
+        args:
+        {{- if .Values.controller.leaderElect }}
+        - --leader-elect
+        {{- end }}
+        - --health-probe-bind-address=:8081
+        - --server-base-url=http://{{ include "opensandbox.fullname" . }}-server.{{ include "opensandbox.serverNamespace" . }}.svc:{{ .Values.server.service.port }}
+        {{- if .Values.server.config.server.api_key }}
+        - --server-api-key={{ .Values.server.config.server.api_key }}
+        {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - "ALL"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          {{- toYaml .Values.controller.resources | nindent 10 }}

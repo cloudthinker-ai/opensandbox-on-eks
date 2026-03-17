@@ -1,0 +1,12 @@
+apiVersion: sandbox.opensandbox.io/v1alpha1
+kind: BatchSandbox
+metadata:
+  labels:
+    app.kubernetes.io/name: sandbox-k8s
+    app.kubernetes.io/managed-by: kustomize
+  name: batchsandbox-sample
+  namespace: opensandbox
+spec:
+  replicas: 1
+  poolRef: pool-sample
+  expireTime: "2026-12-03T12:55:41Z"

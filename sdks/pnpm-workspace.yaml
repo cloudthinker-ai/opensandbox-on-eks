@@ -1,0 +1,3 @@
+packages:
+  - "sandbox/javascript"
+  - "code-interpreter/javascript"

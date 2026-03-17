@@ -1,0 +1,60 @@
+{
+  "name": "@alibaba-group/opensandbox",
+  "version": "0.1.4",
+  "description": "OpenSandbox TypeScript/JavaScript SDK (sandbox lifecycle + execd APIs)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/cjs/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./internal": {
+      "types": "./dist/internal.d.ts",
+      "import": "./dist/internal.js",
+      "require": "./dist/cjs/internal.cjs",
+      "default": "./dist/internal.js"
+    }
+  },
+  "browser": "./dist/index.js",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alibaba/OpenSandbox.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alibaba/OpenSandbox/issues"
+  },
+  "homepage": "https://github.com/alibaba/OpenSandbox",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "gen:api": "node ./scripts/generate-api.mjs",
+    "build": "pnpm run gen:api && tsup",
+    "lint": "eslint src scripts --max-warnings 0",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.14.1",
+    "undici": "^7.18.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "globals": "^17.0.0",
+    "openapi-typescript": "^7.9.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.52.0"
+  }
+}

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "opensandbox.fullname" . }}-controller-metrics
+  namespace: {{ include "opensandbox.controllerNamespace" . }}
+  labels:
+    {{- include "opensandbox.controllerLabels" . | nindent 4 }}
+spec:
+  ports:
+  - name: https
+    port: 8443
+    targetPort: 8443
+    protocol: TCP
+  selector:
+    {{- include "opensandbox.controllerSelectorLabels" . | nindent 4 }}

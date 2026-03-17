@@ -1,0 +1,13 @@
+apiVersion: v2
+name: opensandbox
+description: OpenSandbox - AI sandbox platform for isolated code execution
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - sandbox
+  - kubernetes
+  - ai
+home: https://github.com/cloudthinker-ai/opensandbox-on-eks
+sources:
+  - https://github.com/cloudthinker-ai/opensandbox-on-eks

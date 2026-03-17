@@ -1,0 +1,73 @@
+apiVersion: sandbox.opensandbox.io/v1alpha1
+kind: Pool
+metadata:
+  labels:
+    app.kubernetes.io/name: sandbox-k8s
+    app.kubernetes.io/managed-by: kustomize
+  name: pool-sample
+  namespace: opensandbox
+spec:
+  template:
+    metadata:
+      labels:
+        app: example
+    spec:
+      volumes:
+        - name: sandbox-storage
+          emptyDir: { }
+        - name: opensandbox-bin
+          emptyDir: { }
+        - name: sandbox-logs
+          emptyDir: { }
+      initContainers:
+        - name: task-executor-installer
+          image: registry.example.com/opensandbox/task-executor:latest
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - |
+              cp /workspace/server /opt/opensandbox/bin/task-executor &&
+              chmod +x /opt/opensandbox/bin/task-executor
+          volumeMounts:
+            - name: opensandbox-bin
+              mountPath: /opt/opensandbox/bin
+        - name: execd-installer
+          image: registry.example.com/opensandbox/execd:v1.0.6
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - |
+              cp ./execd /opt/opensandbox/bin/execd &&
+              cp ./bootstrap.sh /opt/opensandbox/bin/bootstrap.sh &&
+              chmod +x /opt/opensandbox/bin/execd &&
+              chmod +x /opt/opensandbox/bin/bootstrap.sh
+          volumeMounts:
+            - name: opensandbox-bin
+              mountPath: /opt/opensandbox/bin
+      containers:
+        - name: sandbox
+          image: registry.example.com/opensandbox/code-interpreter:v1.0.1
+          command:
+          - "/bin/sh"
+          - "-c"
+          - |
+            /opt/opensandbox/bin/task-executor -listen-addr=0.0.0.0:5758 >/tmp/task-executor.log 2>&1
+          env:
+          - name: SANDBOX_MAIN_CONTAINER
+            value: main
+          - name: EXECD_ENVS
+            value: /opt/opensandbox/.env
+          - name: EXECD
+            value: /opt/opensandbox/bin/execd
+          volumeMounts:
+            - name: sandbox-storage
+              mountPath: /var/lib/sandbox
+            - name: opensandbox-bin
+              mountPath: /opt/opensandbox/bin
+            - name: sandbox-logs
+              mountPath: /workspace/logs
+      tolerations:
+        - operator: "Exists"
+  capacitySpec:
+    bufferMax: 3
+    bufferMin: 1
+    poolMax: 5
+    poolMin: 0

@@ -1,0 +1,20 @@
+{{- if and .Values.server.config.egress.enabled .Values.networkAccessConfig.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "opensandbox.fullname" . }}-network-access-config
+  namespace: {{ include "opensandbox.serverNamespace" . }}
+  labels:
+    {{- include "opensandbox.serverLabels" . | nindent 4 }}
+data:
+  config.yaml: |
+    metadataKeys:
+      {{- toYaml .Values.networkAccessConfig.metadataKeys | nindent 6 }}
+    deniedCIDRs:
+      {{- range .Values.networkPolicy.clusterCIDRs }}
+      - {{ . }}
+      {{- end }}
+      - 169.254.0.0/16
+    policies:
+      {{- toYaml .Values.networkAccessConfig.policies | nindent 6 }}
+{{- end }}

@@ -1,0 +1,55 @@
+{{- if and .Values.networkPolicy.enabled .Values.networkAccessConfig.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "opensandbox.fullname" . }}-sandbox-with-egress
+  namespace: {{ include "opensandbox.serverNamespace" . }}
+  labels:
+    {{- include "opensandbox.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      opensandbox.io/component: sandbox
+      opensandbox.io/egress-sidecar: "true"
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow server pods to reach execd on sandbox pods
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "opensandbox.serverSelectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.networkPolicy.execdPort }}
+  egress:
+    # Allow DNS resolution via kube-dns pods
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.dnsNamespace }}
+          podSelector:
+            matchLabels:
+              {{- toYaml .Values.networkPolicy.dnsSelector | nindent 14 }}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow public internet (IPv4), still block cloud metadata endpoint.
+    # The egress sidecar handles domain-level filtering; this NetworkPolicy
+    # provides defense-in-depth against metadata credential theft.
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 169.254.0.0/16
+    # Allow public internet (IPv6), block link-local and cloud metadata
+    - to:
+        - ipBlock:
+            cidr: ::/0
+            except:
+              - fe80::/10
+              - fd00:ec2::/32
+{{- end }}
