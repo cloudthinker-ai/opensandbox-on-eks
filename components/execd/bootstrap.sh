@@ -189,6 +189,16 @@ if [ -n "${SANDBOX_USER:-}" ] && [ "$SANDBOX_USER" != "root" ] && [ "$(id -u)" =
             exit 1
         fi
     fi
+
+    # Re-chown execd files now that SANDBOX_USER definitely exists.
+    # The earlier _setup_execd_files / token-file setup may have run before
+    # the user was created, so the chown silently failed.
+    if [ -n "${EXECD_ACCESS_TOKEN_FILE:-}" ] && [ -f "$EXECD_ACCESS_TOKEN_FILE" ]; then
+        chown "$SANDBOX_USER" "$EXECD_ACCESS_TOKEN_FILE" 2>/dev/null || true
+    fi
+    if [ -n "${EXECD_ENVS:-}" ] && [ -f "$EXECD_ENVS" ]; then
+        chown "$SANDBOX_USER" "$EXECD_ENVS" 2>/dev/null || true
+    fi
 fi
 
 # Remove execute permission on privilege tools for non-root users.
