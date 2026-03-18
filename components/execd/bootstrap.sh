@@ -89,9 +89,9 @@ if [ "${OVERLAY_PERSIST:-}" = "1" ] && [ "${_CAPS_DROPPED:-}" != "1" ]; then
     chmod 750 /mnt/sandbox-data 2>/dev/null || true
     chown root:root /mnt/sandbox-data 2>/dev/null || true
 
-    # SUID/SGID stripping and world-writable fixes are applied at image
-    # build time (Dockerfile steps 21/23).  The overlay lower layer inherits
-    # those permissions so repeating the scan here is unnecessary.
+    # Strip SUID/SGID bits from all binaries. These could allow privilege
+    # escalation if a SUID-root binary has a vulnerability.
+    find / -xdev -perm /6000 -type f -exec chmod a-s {} + 2>/dev/null || true
 
     # Harden kernel tunables where possible (best-effort, may be read-only in container)
     echo 1 > /proc/sys/kernel/unprivileged_bpf_disabled 2>/dev/null || true
@@ -164,6 +164,39 @@ if [ "${_CAPS_DROPPED:-}" != "1" ] && [ -z "${EXECD_ACCESS_TOKEN_FILE:-}" ]; the
         unset EXECD_ACCESS_TOKEN
     fi
 fi
+
+# Ensure SANDBOX_USER exists in the image. Create it if missing so
+# privilege drop never silently falls back to root.
+if [ -n "${SANDBOX_USER:-}" ] && [ "$SANDBOX_USER" != "root" ] && [ "$(id -u)" = "0" ]; then
+    if ! id -u "$SANDBOX_USER" >/dev/null 2>&1; then
+        echo "SANDBOX_USER='$SANDBOX_USER' not found in image — creating." >&2
+        # Prefer useradd (most distros), fall back to adduser (Alpine/BusyBox)
+        if command -v useradd >/dev/null 2>&1; then
+            useradd -m -s /bin/sh --no-log-init "$SANDBOX_USER" 2>/dev/null || true
+        elif command -v adduser >/dev/null 2>&1; then
+            adduser -D -s /bin/sh "$SANDBOX_USER" 2>/dev/null || true
+        else
+            # Minimal fallback: write directly to /etc/passwd
+            _next_uid=$(awk -F: 'BEGIN{n=999}{if($3>=1000 && $3>n)n=$3}END{print n+1}' /etc/passwd 2>/dev/null || echo 1000)
+            echo "$SANDBOX_USER:x:$_next_uid:$_next_uid::/home/$SANDBOX_USER:/bin/sh" >> /etc/passwd
+            echo "$SANDBOX_USER:x:$_next_uid:" >> /etc/group
+            mkdir -p "/home/$SANDBOX_USER"
+            chown "$_next_uid:$_next_uid" "/home/$SANDBOX_USER"
+        fi
+        # Verify creation succeeded
+        if ! id -u "$SANDBOX_USER" >/dev/null 2>&1; then
+            echo "ERROR: Failed to create SANDBOX_USER='$SANDBOX_USER'. Refusing to run as root." >&2
+            exit 1
+        fi
+    fi
+fi
+
+# Remove execute permission on privilege tools for non-root users.
+# These were needed by bootstrap.sh (running as root) but must not be
+# accessible to the sandbox user.
+for _tool in setpriv capsh chroot nsenter unshare; do
+    _path="$(command -v "$_tool" 2>/dev/null)" && [ -n "$_path" ] && chmod 700 "$_path" 2>/dev/null || true
+done
 
 echo "starting OpenSandbox Execd daemon at $EXECD."
 # Launch execd in a supervised restart loop. The loop subshell runs as

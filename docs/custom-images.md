@@ -92,7 +92,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# Optional: create a non-root user for SANDBOX_USER
+# Recommended: pre-create SANDBOX_USER for faster startup (auto-created if missing)
 RUN useradd -m -s /bin/bash sandboxuser
 ```
 
@@ -113,7 +113,7 @@ RUN apk add --no-cache \
 # Add your tools
 RUN apk add --no-cache python3 py3-pip
 
-# Optional: create a non-root user for SANDBOX_USER
+# Recommended: pre-create SANDBOX_USER for faster startup (auto-created if missing)
 RUN adduser -D -s /bin/bash sandboxuser
 ```
 
@@ -150,8 +150,9 @@ root (PID 1, bootstrap.sh)
 
 **Requirements:**
 
-- The user must exist in the image's `/etc/passwd` (create with `useradd` or `adduser` in your Dockerfile)
-- The user's home directory must exist (created automatically by `useradd -m`)
+- **Recommended:** Create the user in your Dockerfile with `useradd -m` or `adduser -D` for faster startup and a proper home directory
+- If the user doesn't exist, `bootstrap.sh` will **auto-create** it at startup (using `useradd`, `adduser`, or raw `/etc/passwd` depending on available tools)
+- Auto-creation adds ~1s to cold start and creates a minimal home directory
 - `bootstrap.sh` uses `getent passwd $SANDBOX_USER` to find the home directory and sets `HOME` accordingly
 
 If `SANDBOX_USER` is not set, the user's code runs as root inside the sandbox.
@@ -222,7 +223,7 @@ apk add --no-cache bash util-linux libcap
 |---------|-------|-----|
 | `bootstrap.sh: not found` | Image doesn't have `/bin/bash` | Install `bash` in your Dockerfile |
 | `mount: permission denied` | Missing `CAP_SYS_ADMIN` | Ensure namespace allows privileged pods (pod security labels) |
-| `setpriv: unknown user` | `SANDBOX_USER` doesn't exist in image | Add `RUN useradd -m -s /bin/bash <user>` to Dockerfile |
+| `setpriv: unknown user` | `SANDBOX_USER` doesn't exist and auto-creation failed | Ensure image has `useradd`, `adduser`, or writable `/etc/passwd`. Or add `RUN useradd -m -s /bin/bash <user>` to Dockerfile |
 | `capsh: command not found` | Missing capability tool | Install `libcap2-bin` (Debian/Ubuntu) or `libcap` (Alpine) |
 | `pivot_root: No such file or directory` | Missing mount utilities | Install `util-linux` |
 | ENTRYPOINT ignored | OpenSandbox overrides it | Don't rely on Dockerfile ENTRYPOINT; pass entrypoint in API call |

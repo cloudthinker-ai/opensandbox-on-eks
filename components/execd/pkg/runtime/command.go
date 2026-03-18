@@ -41,7 +41,7 @@ func (c *Controller) runCommand(ctx context.Context, request *ExecuteCodeRequest
 	signals := make(chan os.Signal, 1)
 	defer close(signals)
 	signal.Notify(signals)
-	defer signal.Reset()
+	defer signal.Stop(signals)
 
 	stdout, stderr, err := c.stdLogDescriptor(session)
 	if err != nil {
@@ -72,7 +72,12 @@ func (c *Controller) runCommand(ctx context.Context, request *ExecuteCodeRequest
 
 	cmd.Dir = request.Cwd
 	// use a dedicated process group so signals propagate to children.
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	// Credential enforces the resolved UID/GID as defense-in-depth:
+	// even if setpriv in bootstrap.sh fails, commands won't run as root.
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid:    true,
+		Credential: runCredential,
+	}
 
 	err = cmd.Start()
 	if err != nil {
@@ -164,14 +169,17 @@ func (c *Controller) runBackgroundCommand(ctx context.Context, cancel context.Ca
 	signals := make(chan os.Signal, 1)
 	defer close(signals)
 	signal.Notify(signals)
-	defer signal.Reset()
+	defer signal.Stop(signals)
 
 	startAt := time.Now()
 	log.Info("received command: %v", request.Code)
 	cmd := exec.CommandContext(ctx, "bash", "-c", request.Code)
 
 	cmd.Dir = request.Cwd
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid:    true,
+		Credential: runCredential,
+	}
 	cmd.Stdout = pipe
 	cmd.Stderr = pipe
 	cmd.Env = mergeEnvs(os.Environ(), loadExtraEnvFromFile(), request.Envs)

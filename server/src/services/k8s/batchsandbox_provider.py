@@ -2077,6 +2077,13 @@ class BatchSandboxProvider(WorkloadProvider):
         # Set SANDBOX_USER so bootstrap.sh drops privileges after overlay setup
         if self.sandbox_user and not any(e.get("name") == "SANDBOX_USER" for e in env):
             env.append({"name": "SANDBOX_USER", "value": self.sandbox_user})
+            if self.sandbox_user != "root":
+                logger.info(
+                    "sandbox_user='%s' will be used for privilege drop. "
+                    "Ensure this user exists in the sandbox image or bootstrap.sh "
+                    "will auto-create it at startup.",
+                    self.sandbox_user,
+                )
 
         # Mount full PVC at /mnt/sandbox-data (for overlay-upper and overlay-work)
         mounts = sandbox_container.setdefault("volumeMounts", [])
