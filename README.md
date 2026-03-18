@@ -110,6 +110,10 @@ For the full architecture — system components, OverlayFS persistence, code exe
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
+## Acknowledgments
+
+This project is built upon [OpenSandbox](https://github.com/alibaba/OpenSandbox) by Alibaba, a general-purpose sandbox platform for AI applications. We are grateful to the Alibaba team and all contributors for open-sourcing the original project under the Apache 2.0 License. Our modifications and extensions are contributed back upstream where applicable.
+
 ## License
 
 This project is open source under the [Apache 2.0 License](LICENSE).
