@@ -30,7 +30,7 @@ This guide provides comprehensive information for developers working on OpenSand
 
 1. **Clone and Navigate**
    ```bash
-   git clone https://github.com/alibaba/OpenSandbox.git
+   git clone https://github.com/cloudthinker-ai/opensandbox-on-eks.git
    cd OpenSandbox/server
    ```
 

@@ -1,9 +1,11 @@
+{{- if .Values.createNamespaces }}
+{{- $serverNs := include "opensandbox.serverNamespace" . }}
+{{- if ne $serverNs .Release.Namespace }}
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ include "opensandbox.serverNamespace" . }}
+  name: {{ $serverNs }}
   labels:
     {{- include "opensandbox.serverLabels" . | nindent 4 }}
-  annotations:
-    meta.helm.sh/release-name: {{ .Release.Name }}
-    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- end }}

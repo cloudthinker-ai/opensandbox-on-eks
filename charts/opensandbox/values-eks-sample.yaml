@@ -1,0 +1,94 @@
+# Sample EKS values — safe to commit (no secrets).
+# Copy to values-eks.yaml, fill in your values, then deploy:
+#   cp values-eks-sample.yaml values-eks.yaml
+#   # Edit values-eks.yaml: replace <ACCOUNT_ID>, <REGION>, set api_key
+#   helm install opensandbox ./charts/opensandbox -f charts/opensandbox/values-eks.yaml
+
+# imagePullSecrets not needed for same-account ECR — EKS node IAM role
+# includes AmazonEC2ContainerRegistryReadOnly by default.
+# Uncomment for cross-account ECR or non-AWS registries:
+# imagePullSecrets:
+#   - name: my-registry-secret
+
+# -- ECR image references (replace <ACCOUNT_ID> and <REGION>)
+images:
+  server:
+    repository: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/opensandbox/server
+    tag: latest
+    pullPolicy: IfNotPresent
+  controller:
+    repository: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/opensandbox/controller
+    tag: latest
+    pullPolicy: IfNotPresent
+  execd:
+    repository: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/opensandbox/execd
+    tag: latest
+  egress:
+    repository: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/opensandbox/egress-sidecar
+    tag: latest
+
+# -- Controller
+controller:
+  replicas: 1
+  resources:
+    limits:
+      cpu: "1"
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# -- Server
+server:
+  replicas: 2
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
+  service:
+    type: LoadBalancer
+    port: 8080
+
+  config:
+    server:
+      host: "0.0.0.0"
+      port: 8080
+      log_level: "INFO"
+      api_key: ""  # REQUIRED: Set a strong API key
+    runtime:
+      type: "kubernetes"
+      startupSweepTimeout: 5
+    kubernetes:
+      namespace: ""
+      informer_enabled: true
+      informer_resync_seconds: 300
+      informer_watch_timeout_seconds: 60
+      workload_provider: "batchsandbox"
+      filesystem_persistence: true
+      snapshot_enabled: true
+      snapshot_class: "ebs-vsc"
+      snapshot_max_retention: 1
+      archive_after_seconds: 86400
+      storage_class: "gp3"
+      storage_size: "20Gi"
+    ingress:
+      mode: "direct"
+    storage:
+      allowed_host_paths: []
+    egress:
+      enabled: true
+      image: "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/opensandbox/egress-sidecar:latest"
+      upstream_dns: ""
+
+# -- NetworkPolicy (adjust clusterCIDRs to match your VPC)
+networkPolicy:
+  enabled: true
+  clusterCIDRs:
+    - 10.0.0.0/8       # Default — narrow this to your actual VPC CIDR
+  dnsNamespace: kube-system
+  dnsSelector:
+    k8s-app: kube-dns
+  execdPort: 44772

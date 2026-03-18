@@ -178,7 +178,7 @@ mode = "direct"  # Docker 运行时仅支持 direct（直连，无 L7 网关）
    ```toml
    [runtime]
    type = "kubernetes"
-   execd_image = "registry.example.com/opensandbox/execd:v1.0.5"
+   execd_image = "registry.example.com/opensandbox/execd:v1.0.6"
 
    [kubernetes]
    kubeconfig_path = "~/.kube/config"

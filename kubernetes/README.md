@@ -43,7 +43,7 @@ Intelligent resource management features:
 - Automatic scaling based on demand
 
 
-## Relationship with [kubernates-sigs/agent-sandbox](kubernates-sigs/agent-sandbox)
+## Relationship with [kubernetes-sigs/agent-sandbox](kubernetes-sigs/agent-sandbox)
 
 BatchSandbox does not duplicate the basic functionality of Agent-Sandbox, but rather complements it with additional enhanced capabilities:
 

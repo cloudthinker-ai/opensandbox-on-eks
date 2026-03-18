@@ -102,7 +102,9 @@ if __name__ == "__main__":
 
 ## Documentation
 
-For the full architecture — system components, OverlayFS persistence, code execution flow, lifecycle state machine, storage, networking, pool system, and configuration — see [docs/architecture.md](docs/architecture.md).
+For a step-by-step walkthrough — deploy and create your first sandbox — see the **[Getting Started](docs/getting-started.md)** guide. To build your own sandbox images, see **[Custom Images](docs/custom-images.md)**.
+
+For the full architecture — system components, OverlayFS persistence, code execution flow, lifecycle state machine, storage, networking, pool system, and configuration — see [docs/architecture.md](docs/architecture/architecture.md).
 
 ## Contributing
 

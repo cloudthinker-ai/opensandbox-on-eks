@@ -1,9 +1,8 @@
+{{- if .Values.createNamespaces }}
 apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ include "opensandbox.controllerNamespace" . }}
   labels:
     {{- include "opensandbox.controllerLabels" . | nindent 4 }}
-  annotations:
-    meta.helm.sh/release-name: {{ .Release.Name }}
-    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+{{- end }}

@@ -214,6 +214,9 @@ Thumbs.db
 .env.test.local
 .env.production.local
 
+# Helm values with real secrets/account IDs (use values-eks-sample.yaml as template)
+charts/opensandbox/values-eks.yaml
+
 # API keys and secrets
 secrets/
 *.pem

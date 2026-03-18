@@ -98,7 +98,7 @@ English | [中文](README_zh.md)
 #### 1. Clone and build
 
 ```bash
-git clone git@github.com:alibaba/OpenSandbox.git
+git clone git@github.com:cloudthinker-ai/opensandbox-on-eks.git
 cd OpenSandbox/components/execd
 go mod download
 make build
@@ -314,6 +314,6 @@ For real-time monitoring, use `/metrics/watch` (SSE, 1s cadence).
 
 ## Support
 
-- Issues: [GitHub Issues](https://github.com/alibaba/OpenSandbox/issues)
-- Documentation: [OpenSandbox Docs](https://github.com/alibaba/OpenSandbox/wiki)
-- Community: [Discussions](https://github.com/alibaba/OpenSandbox/discussions)
+- Issues: [GitHub Issues](https://github.com/cloudthinker-ai/opensandbox-on-eks/issues)
+- Documentation: [OpenSandbox Docs](https://github.com/cloudthinker-ai/opensandbox-on-eks/wiki)
+- Community: [Discussions](https://github.com/cloudthinker-ai/opensandbox-on-eks/discussions)
