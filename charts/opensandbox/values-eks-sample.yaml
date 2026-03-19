@@ -30,6 +30,9 @@ images:
 # -- Controller
 controller:
   replicas: 1
+  namespace: ""  # defaults to {{ .Release.Name }}-system
+  leaderElect: true
+  tolerations: []
   resources:
     limits:
       cpu: "1"
@@ -41,6 +44,8 @@ controller:
 # -- Server
 server:
   replicas: 2
+  namespace: ""  # defaults to {{ .Release.Name }}
+  tolerations: []
   resources:
     requests:
       cpu: 500m
@@ -51,6 +56,7 @@ server:
   service:
     type: LoadBalancer
     port: 8080
+    nodePort: null
 
   config:
     server:
@@ -83,11 +89,55 @@ server:
       image: "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/opensandbox/egress-sidecar:latest"
       upstream_dns: ""
 
+  # -- BatchSandbox pod template
+  batchsandboxTemplate: |
+    metadata:
+    spec:
+      replicas: 1
+      template:
+        spec:
+          terminationGracePeriodSeconds: 5
+          automountServiceAccountToken: false
+          enableServiceLinks: false
+          restartPolicy: OnFailure
+          dnsPolicy: "None"
+          dnsConfig:
+            nameservers:
+              - "8.8.8.8"
+              - "8.8.4.4"
+          tolerations:
+            - operator: "Exists"
+          containers:
+            - name: sandbox
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 512Mi
+                  ephemeral-storage: 2Gi
+                limits:
+                  cpu: "1"
+                  memory: 2Gi
+                  ephemeral-storage: 2Gi
+          volumes:
+            - name: docker-data
+              emptyDir: {}
+
+# -- Per-sandbox network access control (disabled by default)
+networkAccessConfig:
+  enabled: false
+  policies:
+    - scope:
+        type: default
+      defaultAction: allow
+      egress: []
+
 # -- NetworkPolicy (adjust clusterCIDRs to match your VPC)
 networkPolicy:
   enabled: true
   clusterCIDRs:
-    - 10.0.0.0/8       # Default — narrow this to your actual VPC CIDR
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
   dnsNamespace: kube-system
   dnsSelector:
     k8s-app: kube-dns
