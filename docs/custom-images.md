@@ -199,6 +199,26 @@ curl -X POST "http://localhost:8080/v1/sandboxes" \
 
 For public images (e.g., `python:3.11-slim`), omit the `auth` field.
 
+### Use with the Python SDK
+
+```python
+from datetime import timedelta
+from opensandbox import Sandbox
+from opensandbox.config import ConnectionConfig
+
+config = ConnectionConfig(domain="localhost:8080", api_key="your-api-key")
+
+sandbox = await Sandbox.create(
+    "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/my-sandbox:latest",
+    connection_config=config,
+    timeout=timedelta(minutes=30),
+    entrypoint=["python3", "-c", "import time; time.sleep(1800)"],
+    resource={"cpu": "500m", "memory": "512Mi"},
+)
+```
+
+See the [Python SDK Guide](sdk/python-sandbox.md) for full SDK documentation.
+
 ## Using public images directly
 
 Many public images work out of the box. Here are tested examples:
