@@ -112,10 +112,15 @@ If your sandbox image is in a private registry (e.g., ECR), pass `auth` in the i
 
 ## Use the Python SDK
 
-Install the SDK:
+> **Note**: The `opensandbox` package on PyPI is from the upstream Alibaba project and does not match this fork. You must build and install from source.
+
+Install the SDK from source:
 
 ```bash
-pip install opensandbox
+cd sdks/sandbox/python
+make dev-install
+make build
+pip install dist/opensandbox-*.whl
 ```
 
 Quick example:
@@ -124,11 +129,17 @@ Quick example:
 import asyncio
 from datetime import timedelta
 from opensandbox import Sandbox
+from opensandbox.config import ConnectionConfig
 
 async def main():
+    config = ConnectionConfig(
+        domain="localhost:8080",
+        api_key="your-api-key",
+    )
+
     sandbox = await Sandbox.create(
         "python:3.11-slim",
-        entrypoint=["python", "-c", "import time; time.sleep(300)"],
+        connection_config=config,
         timeout=timedelta(minutes=10),
     )
 
@@ -138,48 +149,19 @@ async def main():
         print(result.logs.stdout[0].text)
 
         # Write and read a file
-        from opensandbox.models import WriteEntry
+        from opensandbox.models.filesystem import WriteEntry
         await sandbox.files.write_files([
             WriteEntry(path="/tmp/hello.txt", data="Hello World", mode=644)
         ])
         content = await sandbox.files.read_file("/tmp/hello.txt")
         print(f"File content: {content}")
 
-    await sandbox.kill()
+        await sandbox.kill()
 
 asyncio.run(main())
 ```
 
----
-
-## Optional: Build the code-interpreter image
-
-For a richer sandbox experience with Jupyter and multi-language support (Python, Node.js, Go, Java), build the code-interpreter image:
-
-```bash
-# Build the base image first (this takes a while — it installs multiple language runtimes)
-docker build -t opensandbox/code-interpreter-base:latest \
-  -f sandboxes/code-interpreter/Dockerfile_base sandboxes/code-interpreter/
-
-# Build the code-interpreter image
-docker build -t opensandbox/code-interpreter:latest sandboxes/code-interpreter/
-
-# Push to ECR (replace placeholders)
-docker tag opensandbox/code-interpreter:latest \
-  <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/opensandbox/code-interpreter:latest
-docker push <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/opensandbox/code-interpreter:latest
-```
-
-Then use it in API calls:
-
-```json
-{
-  "image": { "uri": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/opensandbox/code-interpreter:latest" },
-  "entrypoint": ["/opt/opensandbox/code-interpreter.sh"],
-  "timeout": 3600,
-  "resourceLimits": { "cpu": "1", "memory": "2Gi" }
-}
-```
+For the full SDK reference, see the [Python SDK Guide](sdk/python-sandbox.md).
 
 ---
 
@@ -193,5 +175,6 @@ Want to create your own purpose-built sandbox image? See the [Custom Images Guid
 
 - [Architecture](architecture/architecture.md) — system design, OverlayFS persistence, lifecycle state machine
 - **API docs** — Swagger UI at `/docs` and ReDoc at `/redoc` when the server is running
+- [Python SDK Guide](sdk/python-sandbox.md) — full usage guide, configuration reference, and build instructions
 - [SDKs](../sdks/) — Python, Java/Kotlin, TypeScript/JavaScript, C#/.NET
 - [Custom Images](custom-images.md) — build your own sandbox images
