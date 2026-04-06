@@ -135,6 +135,8 @@ sandbox = await Sandbox.create(
 )
 ```
 
+For details on accessing sandbox services via endpoints, see the [Port Forwarding Guide](../port-forwarding.md).
+
 ### Command Execution & Streaming
 
 Execute commands with real-time streaming output using `ExecutionHandlers`:

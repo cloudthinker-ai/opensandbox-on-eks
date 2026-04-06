@@ -162,6 +162,14 @@ storage_size = "{{ .Values.server.config.kubernetes.storage_size }}"
 
 [ingress]
 mode = "{{ .Values.server.config.ingress.mode }}"
+{{- if and (eq .Values.server.config.ingress.mode "gateway") .Values.server.config.ingress.gateway }}
+
+[ingress.gateway]
+address = "{{ .Values.server.config.ingress.gateway.address }}"
+
+[ingress.gateway.route]
+mode = "{{ .Values.server.config.ingress.gateway.route.mode }}"
+{{- end }}
 {{- if .Values.server.config.egress.enabled }}
 
 [egress]

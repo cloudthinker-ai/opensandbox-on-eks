@@ -255,6 +255,23 @@ curl -H "OPEN-SANDBOX-API-KEY: <your-api-key>" \
 
 Wait until `state` is `Running`.
 
+### Access the running service
+
+The sandbox is running a Python HTTP server on port 8000. Get its public URL:
+
+```bash
+curl -s -H "OPEN-SANDBOX-API-KEY: <your-api-key>" \
+  "http://localhost:8080/v1/sandboxes/<sandbox-id>/endpoints/8000" | jq .
+```
+
+Access the service using the returned endpoint:
+
+```bash
+curl http://<sandbox-id>-8000.sandbox.example.com/
+```
+
+For more details, see the [Port Forwarding Guide](../port-forwarding.md).
+
 ### Delete the sandbox
 
 ```bash
