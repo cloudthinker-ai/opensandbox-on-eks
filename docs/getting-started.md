@@ -77,6 +77,23 @@ curl -H "OPEN-SANDBOX-API-KEY: <your-api-key>" \
 
 Wait until `state` is `Running`.
 
+### Access the running service
+
+The sandbox is running a Python HTTP server on port 8000. Get its public URL:
+
+```bash
+curl -s -H "OPEN-SANDBOX-API-KEY: <your-api-key>" \
+  "http://localhost:8080/v1/sandboxes/<sandbox-id>/endpoints/8000" | jq .
+```
+
+Access the service using the returned endpoint:
+
+```bash
+curl http://<sandbox-id>-8000.sandbox.example.com/
+```
+
+For more details, see the [Port Forwarding Guide](port-forwarding.md).
+
 ### Verify the sandbox pod
 
 ```bash
@@ -177,4 +194,5 @@ Want to create your own purpose-built sandbox image? See the [Custom Images Guid
 - **API docs** — Swagger UI at `/docs` and ReDoc at `/redoc` when the server is running
 - [Python SDK Guide](sdk/python-sandbox.md) — full usage guide, configuration reference, and build instructions
 - [SDKs](../sdks/) — Python, Java/Kotlin, TypeScript/JavaScript, C#/.NET
+- [Port Forwarding](port-forwarding.md) — access services running inside your sandbox
 - [Custom Images](custom-images.md) — build your own sandbox images

@@ -82,6 +82,12 @@ server:
       storage_size: "20Gi"
     ingress:
       mode: "direct"
+      # To enable port forwarding with public URLs, switch to gateway mode:
+      # mode: "gateway"
+      # gateway:
+      #   address: "*.sandbox.example.com"  # Your wildcard domain pointing to ALB/NLB
+      #   route:
+      #     mode: "wildcard"
     storage:
       allowed_host_paths: []
     egress:
